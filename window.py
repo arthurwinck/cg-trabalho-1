@@ -6,7 +6,7 @@ class Window(Obj):
         # super().__init__(nome, Tipo.WIN.value, coordenadas)
         self.init_coordenadas(coordenadas)
         self.init_propriedades()
-        self.cor = "#ffffff"
+        #self.cor = "#ffffff"
 
     def init_propriedades(self):
         self.angulo = float()

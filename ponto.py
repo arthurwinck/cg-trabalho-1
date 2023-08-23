@@ -1,0 +1,14 @@
+from tipos import Obj, Tipo
+from numpy import matrix
+
+class Ponto(Obj):
+
+    def __init__(self, nome: str, cor: str, tipo: Tipo, coordenadas: list):
+        super().__init__(nome, cor, tipo, coordenadas)
+        self.esta_na_window = bool
+
+    def normalizacao(self, matriz : matrix):
+        self.cood_normalizada = self.mulPontoMat2D(matriz)
+
+    def ponto_esta_window(self):
+        pass
