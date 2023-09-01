@@ -135,3 +135,54 @@ class CreateObjectModal():
         else:
             self.msg_label.config(text="Nome já existente!", foreground="red")
 
+class CreateTransformModal():
+    def __init__(self, interface):
+        self.interface = interface
+
+    def levantar_frame(self, frame:Frame, frame2:Frame = None, frame3:Frame = None,):
+        frame.tkraise()
+        if frame2:
+            frame2.tkraise()
+        if frame3:
+            frame3.tkraise()
+
+    def execute(self, obj):
+        self.obj = obj
+        self.pop = Toplevel(self.interface.main_window)
+        self.pop.geometry("600x500+250+200")
+        self.pop.title("Transformacoes")
+        self.pop.config(bg="gray")
+        
+        self.modal_transformar()
+        self.levantar_frame(self.transform_frame)
+
+    def retorna_valores(self):
+        self.interface.transformar((self.transladx.get(), self.translady.get()),(self.escalonax.get(), self.escalonay.get()), self.rotateang.get(), self.obj)
+
+
+    def modal_transformar(self):
+        self.transform_frame = Frame(self.pop, bg="gray", borderwidth=1, relief="raised", width=600, height=500)
+        self.transform_frame.place(x=0, y=0) 
+        Button(self.transform_frame, text="Executar transformacoes",command=self.retorna_valores, width=20).place(x=350, y=450)
+
+
+        Label(self.transform_frame, bg="gray", text="ESCALONAMENTO").place(x=10, y=100)
+        Label(self.transform_frame, bg="gray", text="X :").place(x=200, y=100)
+        self.transladx = Entry(self.transform_frame, width=5)
+        self.transladx.place(x=220, y=100)
+        Label(self.transform_frame, bg="gray", text="Y :").place(x=300, y=100)
+        self.translady = Entry(self.transform_frame, width=5)
+        self.translady.place(x=320, y=100)
+
+        Label(self.transform_frame, bg="gray", text="TRANSLACAO").place(x=10, y=200)
+        Label(self.transform_frame, bg="gray", text="X :").place(x=200, y=200)
+        self.escalonax = Entry(self.transform_frame, width=5)
+        self.escalonax.place(x=220, y=200)
+        Label(self.transform_frame, bg="gray", text="Y :").place(x=300, y=200)
+        self.escalonay = Entry(self.transform_frame, width=5)
+        self.escalonay.place(x=320, y=200)
+
+        Label(self.transform_frame, bg="gray", text="ROTACAO").place(x=10, y=300)
+        Label(self.transform_frame, bg="gray", text="Angulo").place(x=250, y=300)
+        self.rotateang = Entry(self.transform_frame, width=5)
+        self.rotateang.place(x=300, y=300)

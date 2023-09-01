@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter.ttk import Style
-from createObjectModal import CreateObjectModal
+from createObjectModal import CreateObjectModal, CreateTransformModal
 from window import Window
 from linha import Linha
 from poligono import Poligono
@@ -12,6 +12,7 @@ class Interface():
         self.objetos_dict = {}
         self.initialize()
         self.create_object_modal = CreateObjectModal(self)
+        self.creat_transform_modal = CreateTransformModal(self)
 
     def initialize(self) -> None:
         self.create_main_window()
@@ -29,7 +30,7 @@ class Interface():
 
     def create_main_window(self) -> None:
         self.main_window = Tk()
-        self.main_window.geometry("930x700+450+200")
+        self.main_window.geometry("930x700+450+50")
         self.main_window.title("Sistema 2D")
         self.main_window["bg"]= "gray"
 
@@ -54,7 +55,7 @@ class Interface():
 
     def create_display_file(self) -> None:
         self.dFile_frame = Frame(self.main_window, borderwidth=1, relief="raised", bg="gray")
-        self.dFile_frame.place(x=10, y=10, width=200, height=670)
+        self.dFile_frame.place(x=10, y=10, width=220, height=670)
 
     def create_object_list(self) -> None:
         self.scroll_frame = Frame(self.dFile_frame, bg="black")
@@ -151,10 +152,18 @@ class Interface():
         self.botao_del.place(x=110, y=500, width=100)
 
 
-        self.botao_del = Button(self.dFile_frame, text="Transformar", command=lambda:self.transformar())
-        self.botao_del.place(x=75, y=600, width=100)
+        self.botao_del = Button(self.dFile_frame, text="Transformar", command=lambda:self.handle_transformar())
+        self.botao_del.place(x=50, y=600, width=100)
 
-    def transformar(self) -> None:
+    def handle_transformar(self):
+        current_obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
+        #centro_obj = tuple(current_obj.centro)
+        self.creat_transform_modal.execute(current_obj)
+        # translacao = list_result[0]
+        # escalonamento = list_result[1]
+        # rotacao = list_result[2]
+
+    def transformar(self, translacao, escalonamento, rotacao, obj) -> None:
 
 
         # Criei 3 operações separadas de escalonamento, rotação e translação (já pronta da outra vez e usando o obj teste) para testar com os botões
@@ -173,28 +182,40 @@ class Interface():
         # 5) metodo transformar() calcula a matriz resultante de todas as transformacoes (se n tiver colocado alguma transf. a gnt coloca a matriz identidade pra n afetar o calculo)
         
         # parametros
-        Sx, Sy = 1.5, 1.5
-        grau = 15
-        Dx, Dy = 0.2, 0.2
+        if translacao[0] != "" and translacao[1] != "":
+            Sx, Sy = float(translacao[0]), float(translacao[1])
+        if rotacao != "":
+            grau = float(rotacao)
+        if escalonamento[0] != "" and escalonamento[1] != "":
+            Dx, Dy = float(escalonamento[0]), float(escalonamento[1])
 
         # TODO permitir q qualquer objeto seja transformado
-        obj = self.objetos_dict['teste']
+        #obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
         centro = tuple(obj.centro)
 
         #TODO remover hard-code colocando essa funcao dentro do modal
         matriz_final = self.transladar2D(-centro[0], -centro[1])
-        matriz_final = np.matmul(matriz_final, self.escalonar2D(Sx, Sy))
-        matriz_final = np.matmul(matriz_final, self.rotacionar2D(grau))
+        if translacao[0] != "" and translacao[1] != "":
+            Sx, Sy = float(translacao[0]), float(translacao[1])
+            matriz_final = np.matmul(matriz_final, self.escalonar2D(Sx, Sy))
+        if rotacao != "":
+            grau = float(rotacao)
+            matriz_final = np.matmul(matriz_final, self.rotacionar2D(grau))
+        if escalonamento[0] != "" and escalonamento[1] != "":
+            Dx, Dy = float(escalonamento[0]), float(escalonamento[1])
+            
         matriz_final = np.matmul(matriz_final, self.transladar2D(centro[0], centro[1]))
 
         # Translacao do usuario
-        matriz_final = np.matmul(matriz_final, self.transladar2D(Dx, Dy))
+        if escalonamento[0] != "" and escalonamento[1] != "":
+            Dx, Dy = float(escalonamento[0]), float(escalonamento[1])
+            matriz_final = np.matmul(matriz_final, self.transladar2D(Dx, Dy))
 
         obj.mover_xy(matriz_final)
         self.redraw()
         
     def escalonar_e_reposicionar(self, Sx, Sy) -> None:
-        obj = self.objetos_dict['teste']
+        obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
         centro = tuple(obj.centro)
 
         matriz_final = self.transladar2D(-centro[0], -centro[1])
@@ -205,7 +226,7 @@ class Interface():
         self.redraw()
 
     def rotacionar_e_reposicionar(self, grau) -> None:
-        obj = self.objetos_dict['teste']
+        obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
         centro = tuple(obj.centro)
 
         matriz_final = self.transladar2D(-centro[0], -centro[1])
@@ -220,13 +241,13 @@ class Interface():
         matriz_final = np.matmul(matriz_final, self.rotacionar2D(grau))
         matriz_final = np.matmul(matriz_final, self.transladar2D(-ponto[0], -ponto[1]))
 
-        obj = self.objetos_dict['teste']
+        obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
         obj.mover_xy(matriz_final)
 
         self.redraw()
 
     def transladar(self, Dx, Dy):
-        obj = self.objetos_dict['teste']
+        obj = self.objetos_dict[self.object_list.get(self.object_list.curselection())]
 
         matriz_final = self.transladar2D(Dx, Dy)
 
